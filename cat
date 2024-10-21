@@ -1,1 +1,0 @@
-OCI runtime exec failed: exec failed: unable to start container process: exec: "/var/jenkins_home/secrets/initialAdminPassword": permission denied: unknown
