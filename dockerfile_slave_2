@@ -1,0 +1,38 @@
+# Use an appropriate base image (Ubuntu 20.04)
+FROM ubuntu:20.04
+
+# Install necessary dependencies: OpenJDK (for Jenkins), OpenSSH (for SSH access), and Docker
+RUN apt-get update && apt-get install -y \
+    openjdk-11-jdk \
+    openssh-server \
+    docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configure SSH
+RUN mkdir /var/run/sshd
+RUN echo 'root:root' | chpasswd
+RUN sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+
+# Create Jenkins user
+RUN useradd -ms /bin/bash jenkins
+RUN echo 'jenkins:jenkins' | chpasswd
+
+# Set up SSH for Jenkins user
+RUN mkdir -p /home/jenkins/.ssh && chown -R jenkins:jenkins /home/jenkins/.ssh
+RUN mkdir /home/jenkins/workspace && chown -R jenkins:jenkins /home/jenkins/workspace
+
+# Create the Jenkins home directory
+RUN mkdir -p /var/jenkins
+
+# Set permissions for the Jenkins directory
+RUN chmod 777 /var/jenkins
+
+# Add Jenkins user to Docker group for Docker permissions
+RUN usermod -aG docker jenkins
+
+# Expose port 22 for SSH
+EXPOSE 22
+
+# Start SSH service
+CMD ["/usr/sbin/sshd", "-D"]
+
